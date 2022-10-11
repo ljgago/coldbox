@@ -1,27 +1,30 @@
 use bdk::bitcoin::util::bip32::{DerivationPath, ExtendedPrivKey};
 use bdk::bitcoin::Network;
+use clap::builder::{TypedValueParser, PossibleValuesParser};
 use clap::{Args, Parser, Subcommand};
 
 #[derive(Debug, Parser)]
-#[clap(
+#[command(
     author,
     version,
     about,
     long_about = None,
+    verbatim_doc_comment,
 )]
 pub struct Cli {
     /// Sets the network
-    #[clap(
+    #[arg(
         short,
         long,
-        value_parser,
-        value_names = &["NETWORK"],
-        possible_values = ["bitcoin", "testnet", "signet", "regtest"],
+        value_enum,
+        value_parser = PossibleValuesParser::new(["bitcoin", "testnet", "signet", "regtest"])
+            .try_map(|s| s.parse::<Network>()),
+        value_name = "NETWORK",
         default_value = "testnet",
     )]
     pub network: Network,
 
-    #[clap(subcommand)]
+    #[command(subcommand)]
     pub command: CliCommand,
 }
 
@@ -37,13 +40,31 @@ pub enum CliCommand {
 
 #[derive(Debug, Args)]
 pub struct Key {
-    #[clap(subcommand)]
+    #[command(subcommand)]
     pub command: KeyCommand,
 }
 
 #[derive(Debug, Args)]
 pub struct Wallet {
-    #[clap(subcommand)]
+    /// Sets the descriptor to use for the external addresses
+    #[arg(short, long, value_parser, value_name = "DESCRIPTOR")]
+    pub descriptor: String,
+
+    /// Sets the Electrum server to use
+    #[clap(
+        short,
+        long,
+        value_parser,
+        value_name = "ELECTRUM_URL",
+        default_value = "ssl://electrum.blockstream.info:60002"
+    )]
+    pub server: String,
+
+    /// Adds verbosity, returns PSBT in JSON format alongside serialized, displays expanded objects
+    #[arg(short, long, value_parser, default_value = "false", global = true)]
+    pub verbose: bool,
+
+    #[command(subcommand)]
     pub command: WalletCommand,
 }
 
@@ -67,106 +88,73 @@ pub enum KeyCommand {
 pub enum WalletCommand {
     /// Wallet
     Balance(Balance),
+
+    /// Sign
+    Sign(Sign),
 }
 
 // 3th argument level
 #[derive(Debug, Args)]
 pub struct Change {
     /// Target format
-    #[clap(
-        short,
-        long,
-        value_parser,
-        value_names = &["FORMAT"],
-    )]
+    #[arg(short, long, value_name = "FORMAT")]
     pub format: String,
 
     /// Key source
-    #[clap(
-        short,
-        long,
-        value_parser,
-        value_names = &["KEY"],
-    )]
+    #[arg(short, long, value_name = "KEY")]
     pub key: String,
 }
 
 #[derive(Debug, Args)]
 pub struct Derive {
     /// Derivation path (e.g. "m/84'/0'/0'" or "m/84h/0h/0h")
-    #[clap(
-        short,
-        long,
-        value_parser,
-        value_names = &["PATH"],
-        default_value = "m/84'/0'/0'",
-    )]
+    #[arg(short, long, value_name = "PATH", default_value = "m/84'/0'/0'")]
     pub path: DerivationPath,
 
     /// Private key
-    #[clap(
-        short,
-        long,
-        value_parser,
-        value_names = &["XPRV"],
-    )]
+    #[arg(short, long, value_name = "XPRV")]
     pub xprv: ExtendedPrivKey,
 }
 
 #[derive(Debug, Args)]
 pub struct Generate {
     /// Dice roll of random seed
-    #[clap(
-        short,
-        long,
-        value_parser,
-        value_names = &["NUMBER"],
-        default_value = "99",
-    )]
+    #[arg(short, long, value_parser, value_name = "NUMBER", default_value_t = 99)]
     pub dicerolls: usize,
 
     /// Entropy level based on number of random seed mnemonic words
-    #[clap(
+    #[arg(
         short,
         long,
-        value_parser,
-        value_names = &["NUMBER"],
-        possible_values = ["12", "24"],
-        default_value = "12",
+        value_parser = PossibleValuesParser::new(["12", "24"])
+            .try_map(|s| s.parse::<u8>()),
+        value_name = "NUMBER",
+        default_value_t = 12,
     )]
     pub entropy: u8,
 
     /// Seed password
-    #[clap(
-        short,
-        long,
-        value_parser,
-        value_names = &["PASSWORD"],
-    )]
+    #[arg(short, long, value_name = "PASSWORD")]
     pub password: Option<String>,
 }
 
 #[derive(Debug, Args)]
 pub struct Restore {
     /// Seed mnemonic words, must be quoted (eg. "word1 word2 ...")
-    #[clap(
-        short,
-        long,
-        value_parser,
-        value_names = &["MNEMONIC"],
-    )]
+    #[arg(short, long, value_name = "MNEMONIC")]
     pub mnemonic: String,
 
     /// Seed password
-    #[clap(
-        short,
-        long,
-        value_parser,
-        value_names = &["PASSWORD"],
-    )]
+    #[arg(short, long, value_name = "PASSWORD")]
     pub password: Option<String>,
-
 }
 
 #[derive(Debug, Args)]
 pub struct Balance {}
+
+#[derive(Debug, Args)]
+pub struct Sign {
+    /// Sets the PSBT to sign
+    #[arg(short, long, value_name = "BASE64_PSBT")]
+    pub psbt: String,
+}

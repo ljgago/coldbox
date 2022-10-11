@@ -1,6 +1,5 @@
 use bdk::bitcoin::util::base58;
 
-
 pub fn prefixes(prefix: &str) -> Option<&str> {
     match prefix {
         // private

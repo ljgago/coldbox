@@ -15,23 +15,32 @@ fn main() {
             KeyCommand::Change(cmd) => {
                 let result = cmd.change();
                 output(result);
-            },
+            }
             KeyCommand::Generate(cmd) => {
                 let result = cmd.generate(network);
                 output(result);
-            },
+            }
             KeyCommand::Derive(cmd) => {
                 let result = cmd.derive(network);
                 output(result);
-            },
+            }
             KeyCommand::Restore(cmd) => {
                 let result = cmd.restore(network);
                 output(result);
-            },
+            }
         },
-        CliCommand::Wallet(wallet) => match wallet.command {
-            WalletCommand::Balance(_cmd) => {}
-        },
+        CliCommand::Wallet(wallet) => {
+            let descriptor = wallet.descriptor;
+            let verbose = wallet.verbose;
+
+            match wallet.command {
+                WalletCommand::Balance(_cmd) => {}
+                WalletCommand::Sign(cmd) => {
+                    let result = cmd.sign(network, descriptor, verbose);
+                    output(result);
+                }
+            }
+        }
     }
 }
 
@@ -40,7 +49,8 @@ fn output(result: Result<serde_json::Value, Error>) {
         Ok(value) => println!("{}", serde_json::to_string_pretty(&value).unwrap()),
         Err(e) => {
             match e {
-                Error::ChecksumMismatch => error!("Descriptor checksum mismatch. Are you using a different descriptor for an already defined wallet name? (if you are not specifying the wallet name it is automatically named based on the descriptor)"),
+                Error::ChecksumMismatch => error!("Descriptor checksum mismatch. Are you using a different descriptor for an already defined \
+                    wallet name? (if you are not specifying the wallet name it is automatically named based on the descriptor)"),
                 e => error!("{}", e.to_string()),
             }
         },

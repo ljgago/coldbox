@@ -133,7 +133,6 @@ impl Change {
 
         let (fingerprint, parent_fingerprint, depth) = info.unwrap();
 
-
         Ok(json!({
             "fingerprint": fingerprint,
             "parent_fingerprint": parent_fingerprint,
