@@ -25,7 +25,7 @@ impl Derive {
 
         if let DescriptorKey::Secret(desc_seckey, _, _) = derived_xprv_desc_key {
             let desc_pubkey = desc_seckey
-                .as_public(&secp)
+                .to_public(&secp)
                 .map_err(|e| Error::Generic(e.to_string()))?;
 
             Ok(json!({ "xprv": desc_seckey.to_string(), "xpub": desc_pubkey.to_string() }))
