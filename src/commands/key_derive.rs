@@ -1,7 +1,7 @@
 use crate::cli::Derive;
 
 use bdk::bitcoin::secp256k1::Secp256k1;
-use bdk::bitcoin::util::bip32::{DerivationPath, KeySource};
+use bdk::bitcoin::bip32::{DerivationPath, KeySource};
 use bdk::bitcoin::Network;
 use bdk::descriptor::Segwitv0;
 use bdk::keys::KeyError::{InvalidNetwork, Message};
@@ -40,7 +40,7 @@ mod test {
     use super::*;
     use std::str::FromStr;
 
-    use bdk::bitcoin::util::bip32::ExtendedPrivKey;
+    use bdk::bitcoin::bip32::ExtendedPrivKey;
 
     // https://github.com/satoshilabs/slips/blob/master/slip-0132.md
 

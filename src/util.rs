@@ -1,4 +1,4 @@
-use bdk::bitcoin::util::base58;
+use bdk::bitcoin::base58;
 
 pub fn prefixes(prefix: &str) -> Option<&str> {
     match prefix {
@@ -78,10 +78,10 @@ pub fn get_version(key: &str, format: &str) -> Option<String> {
         })
         .collect();
 
-    let data = base58::from_check(key).unwrap();
+    let data = base58::decode_check(key).unwrap();
     let data = [&prefix_target, &data[4..]].concat();
 
-    Some(base58::check_encode_slice(&data))
+    Some(base58::encode_check(&data))
 }
 
 #[cfg(test)]

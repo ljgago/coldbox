@@ -1,4 +1,4 @@
-use bdk::bitcoin::util::bip32::{DerivationPath, ExtendedPrivKey};
+use bdk::bitcoin::bip32::{DerivationPath, ExtendedPrivKey};
 use bdk::bitcoin::Network;
 use clap::builder::{TypedValueParser, PossibleValuesParser};
 use clap::{Args, Parser, Subcommand};

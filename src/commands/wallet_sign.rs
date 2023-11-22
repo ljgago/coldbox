@@ -1,8 +1,8 @@
 use crate::cli::Sign;
 
 use base64::{Engine, engine::general_purpose};
-use bdk::bitcoin::consensus::{deserialize, serialize};
 use bdk::bitcoin::Network;
+use bdk::bitcoin::psbt::PartiallySignedTransaction;
 use bdk::database::MemoryDatabase;
 use bdk::{Error, SignOptions, Wallet};
 
@@ -18,11 +18,11 @@ impl Sign {
         let wallet = Wallet::new(&descriptor, None, network, MemoryDatabase::default())?;
 
         let psbt = general_purpose::STANDARD.decode(&self.psbt).unwrap();
-        let mut psbt = deserialize(&psbt)?;
+        let mut psbt = PartiallySignedTransaction::deserialize(&psbt)?;
 
         let finalized = wallet.sign(&mut psbt, SignOptions::default())?;
 
-        let psbt_base64 = general_purpose::STANDARD.encode(&serialize(&psbt));
+        let psbt_base64 = general_purpose::STANDARD.encode(psbt.serialize());
 
         match verbose {
             true => Ok(json!({

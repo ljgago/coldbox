@@ -32,7 +32,7 @@ impl Generate {
 
         let mnemonic: GeneratedKey<_, miniscript::BareCtx> = Mnemonic::generate_with_entropy(
             (mnemonic_type, Language::English),
-            *entropy_hash.as_inner(),
+            *entropy_hash.as_ref(),
         )
         .map_err(|_| Error::Generic("Mnemonic generation error".to_string()))?;
 

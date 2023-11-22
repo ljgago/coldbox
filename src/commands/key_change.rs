@@ -3,8 +3,8 @@ use crate::cli::Change;
 use std::str::FromStr;
 
 use bdk::bitcoin::secp256k1::Secp256k1;
-use bdk::bitcoin::util::base58;
-use bdk::bitcoin::util::bip32::{ExtendedPrivKey, ExtendedPubKey, Fingerprint};
+use bdk::bitcoin::base58;
+use bdk::bitcoin::bip32::{ExtendedPrivKey, ExtendedPubKey, Fingerprint};
 // use bdk::bitcoin::Network;
 use bdk::keys::KeyError::Message;
 use bdk::Error;
@@ -71,10 +71,10 @@ fn converter(key: &str, format: &str) -> Option<String> {
         })
         .collect();
 
-    let data = base58::from_check(key).unwrap();
+    let data = base58::decode_check(key).unwrap();
     let data = [&prefix_target, &data[4..]].concat();
 
-    Some(base58::check_encode_slice(&data))
+    Some(base58::encode_check(&data))
 }
 
 pub fn key_info(key: &str) -> Option<(Fingerprint, Fingerprint, u8)> {
